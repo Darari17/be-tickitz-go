@@ -1,0 +1,826 @@
+definitions:
+  dtos.ChangePasswordRequest:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
+  dtos.CreateOrderRequest:
+    properties:
+      email:
+        example: farid@example.com
+        type: string
+      fullname:
+        example: Farid Darari
+        type: string
+      payment_id:
+        example: 2
+        type: integer
+      phone:
+        example: "+628123456789"
+        type: string
+      schedule_id:
+        example: 8
+        type: integer
+      seat_codes:
+        example:
+        - '["A1"'
+        - '"A2"]'
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - email
+    - fullname
+    - payment_id
+    - phone
+    - schedule_id
+    - seat_codes
+    type: object
+  dtos.ProfileRequest:
+    properties:
+      firstname:
+        example: Farid
+        type: string
+      lastname:
+        example: Darari
+        type: string
+      phone_number:
+        type: string
+    type: object
+  dtos.Response:
+    properties:
+      code:
+        example: 200
+        type: integer
+      data: {}
+      message:
+        example: request berhasil
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  dtos.UserRequest:
+    properties:
+      email:
+        example: user@mail.com
+        type: string
+      password:
+        example: Password123
+        type: string
+    required:
+    - email
+    - password
+    type: object
+info:
+  contact: {}
+  title: Backend Tickitz
+  version: "1.0"
+paths:
+  /admin/movies:
+    get:
+      description: Retrieve all movies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get list of movies
+      tags:
+      - Admin - Movies
+    post:
+      consumes:
+      - multipart/form-data
+      description: Add a new movie with genres, casts, schedules, poster & backdrop
+      parameters:
+      - description: Movie Title
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Movie Overview
+        in: formData
+        name: overview
+        type: string
+      - description: Director Name
+        in: formData
+        name: director_name
+        type: string
+      - description: Duration in minutes
+        in: formData
+        name: duration
+        type: integer
+      - description: Release date in format YYYY-MM-DD
+        in: formData
+        name: release_date
+        type: string
+      - description: Popularity
+        in: formData
+        name: popularity
+        type: number
+      - description: Poster image
+        in: formData
+        name: poster
+        type: file
+      - description: Backdrop image
+        in: formData
+        name: backdrop
+        type: file
+      - collectionFormat: csv
+        description: Genre IDs
+        in: formData
+        items:
+          type: integer
+        name: genres
+        type: array
+      - collectionFormat: csv
+        description: Cast IDs
+        in: formData
+        items:
+          type: integer
+        name: casts
+        type: array
+      - description: Schedules JSON [{cinema_id, location_id, date, time_ids}]
+        in: formData
+        name: schedules
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Create new movie
+      tags:
+      - Admin - Movies
+  /admin/movies/{id}:
+    delete:
+      description: Soft delete a movie by ID
+      parameters:
+      - description: Movie ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Delete movie
+      tags:
+      - Admin - Movies
+    get:
+      description: Retrieve a movie by ID
+      parameters:
+      - description: Movie ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get movie detail
+      tags:
+      - Admin - Movies
+    patch:
+      consumes:
+      - multipart/form-data
+      description: Update movie data including genres, casts, and images
+      parameters:
+      - description: Movie ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Movie Title
+        in: formData
+        name: title
+        type: string
+      - description: Movie Overview
+        in: formData
+        name: overview
+        type: string
+      - description: Director Name
+        in: formData
+        name: director_name
+        type: string
+      - description: Duration in minutes
+        in: formData
+        name: duration
+        type: integer
+      - description: Release date in format YYYY-MM-DD
+        in: formData
+        name: release_date
+        type: string
+      - description: Popularity
+        in: formData
+        name: popularity
+        type: number
+      - description: Poster image
+        in: formData
+        name: poster
+        type: file
+      - description: Backdrop image
+        in: formData
+        name: backdrop
+        type: file
+      - collectionFormat: csv
+        description: Genre IDs
+        in: formData
+        items:
+          type: integer
+        name: genres
+        type: array
+      - collectionFormat: csv
+        description: Cast IDs
+        in: formData
+        items:
+          type: integer
+        name: casts
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Update movie
+      tags:
+      - Admin - Movies
+  /movies:
+    get:
+      description: Retrieve a paginated list of movies with optional search and genre
+        filter
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Search by title
+        in: query
+        name: search
+        type: string
+      - description: Filter by genre ID
+        in: query
+        name: genre
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get all movies
+      tags:
+      - Movies
+  /movies/{id}:
+    get:
+      description: Retrieve detailed information about a movie by ID
+      parameters:
+      - description: Movie ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get movie detail
+      tags:
+      - Movies
+  /movies/genres:
+    get:
+      description: Retrieve list of all available genres
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get all genres
+      tags:
+      - Movies
+  /movies/popular:
+    get:
+      description: Retrieve a paginated list of popular movies
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get popular movies
+      tags:
+      - Movies
+  /movies/upcoming:
+    get:
+      description: Retrieve a paginated list of upcoming movies
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get upcoming movies
+      tags:
+      - Movies
+  /orders:
+    post:
+      consumes:
+      - application/json
+      description: Create a new order and save to database
+      parameters:
+      - description: Order Data
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Create a new order
+      tags:
+      - Orders
+  /orders/{id}:
+    get:
+      description: Retrieve detail of a transaction
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get transaction detail
+      tags:
+      - Orders
+  /orders/cinemas:
+    get:
+      description: Retrieve list of available cinemas
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get all cinemas
+      tags:
+      - Orders
+  /orders/history:
+    get:
+      description: Retrieve order history for current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get order history
+      tags:
+      - Orders
+  /orders/locations:
+    get:
+      description: Retrieve list of available locations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get all locations
+      tags:
+      - Orders
+  /orders/payments:
+    get:
+      description: Retrieve list of available payment methods
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get all payment methods
+      tags:
+      - Orders
+  /orders/schedules:
+    get:
+      description: Retrieve all schedules for a movie
+      parameters:
+      - description: Movie ID
+        in: query
+        name: movie_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get schedules by movie ID
+      tags:
+      - Orders
+  /orders/seats:
+    get:
+      description: Retrieve available seats for a schedule
+      parameters:
+      - description: Schedule ID
+        in: query
+        name: schedule_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get available seats
+      tags:
+      - Orders
+  /orders/times:
+    get:
+      description: Retrieve list of available movie times
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: Get all times
+      tags:
+      - Orders
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password
+      parameters:
+      - description: User login credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: User login
+      tags:
+      - User - Auth
+  /users/profile:
+    get:
+      description: Retrieve logged in user profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user profile
+      tags:
+      - User - Profile
+    patch:
+      consumes:
+      - application/json
+      description: Update first name, last name, and phone number
+      parameters:
+      - description: Profile update request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.ProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      security:
+      - BearerAuth: []
+      summary: Update user profile
+      tags:
+      - User - Profile
+  /users/profile/avatar:
+    patch:
+      consumes:
+      - multipart/form-data
+      description: Upload a new avatar image for user profile
+      parameters:
+      - description: Avatar image
+        in: formData
+        name: avatar
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      security:
+      - BearerAuth: []
+      summary: Change user avatar
+      tags:
+      - User - Profile
+  /users/profile/change-password:
+    patch:
+      consumes:
+      - application/json
+      description: Update old password to new password
+      parameters:
+      - description: Change password request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      security:
+      - BearerAuth: []
+      summary: Change user password
+      tags:
+      - User - Profile
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with email and password
+      parameters:
+      - description: User registration request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Response'
+      summary: User registration
+      tags:
+      - User - Auth
+securityDefinitions:
+  BearerAuth:
+    description: RESTful API created using gin for BE Tickitz
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
