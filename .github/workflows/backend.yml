@@ -1,4 +1,4 @@
-name: Building image ba-tickitz-go and pushing to GHCR
+name: Building image backend-tickitz-go and pushing to GHCR
 on: [push]
 jobs:
   Build-And-Publish:
