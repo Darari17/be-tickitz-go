@@ -26,7 +26,6 @@ func (r *AdminRepo) CreateMovie(
 	}
 	defer tx.Rollback(ctx)
 
-	// insert movie
 	q := `
 		INSERT INTO movies (backdrop_path, overview, popularity, poster_path, release_date, duration, title, director_name, created_at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW())
@@ -41,7 +40,6 @@ func (r *AdminRepo) CreateMovie(
 		return nil, err
 	}
 
-	// insert genres (validate ID exists)
 	for _, gid := range genreIDs {
 		var exists bool
 		if err := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM genres WHERE id=$1)`, gid).Scan(&exists); err != nil || !exists {
@@ -52,7 +50,6 @@ func (r *AdminRepo) CreateMovie(
 		}
 	}
 
-	// insert casts (validate ID exists)
 	for _, cid := range castIDs {
 		var exists bool
 		if err := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM casts WHERE id=$1)`, cid).Scan(&exists); err != nil || !exists {
@@ -63,7 +60,6 @@ func (r *AdminRepo) CreateMovie(
 		}
 	}
 
-	// insert schedules
 	for _, s := range schedules {
 		date := s["date"].(time.Time)
 		cinemaID := s["cinema_id"].(int)
@@ -182,7 +178,6 @@ func (r *AdminRepo) UpdateMovie(
 	}
 	defer tx.Rollback(ctx)
 
-	// update fields
 	if len(update) > 0 {
 		var setClauses []string
 		args := []interface{}{}
@@ -205,7 +200,6 @@ func (r *AdminRepo) UpdateMovie(
 		}
 	}
 
-	// update genres (replace all if provided)
 	if len(genreIDs) > 0 {
 		if _, err := tx.Exec(ctx, `DELETE FROM movies_genres WHERE movies_id=$1`, id); err != nil {
 			return err
@@ -221,7 +215,6 @@ func (r *AdminRepo) UpdateMovie(
 		}
 	}
 
-	// update casts (replace all if provided)
 	if len(castIDs) > 0 {
 		if _, err := tx.Exec(ctx, `DELETE FROM movies_casts WHERE movies_id=$1`, id); err != nil {
 			return err

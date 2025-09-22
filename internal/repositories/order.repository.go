@@ -20,12 +20,6 @@ func NewOrderRepo(db *pgxpool.Pool) *OrderRepo {
 	return &OrderRepo{db: db}
 }
 
-//
-// ========================
-// Orders
-// ========================
-//
-
 func (or *OrderRepo) CreateOrder(ctx context.Context, order *models.Order, seatIDs []int) (*models.Order, error) {
 	tx, err := or.db.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -33,7 +27,6 @@ func (or *OrderRepo) CreateOrder(ctx context.Context, order *models.Order, seatI
 	}
 	defer tx.Rollback(ctx)
 
-	// hardcode QR Code jika kosong
 	if order.QRCode == "" {
 		order.QRCode = fmt.Sprintf("QR-%d", time.Now().Unix())
 	}
@@ -243,12 +236,6 @@ func (or *OrderRepo) GetOrderHistory(ctx context.Context, userID uuid.UUID) ([]m
 	return orders, nil
 }
 
-//
-// ========================
-// Payments
-// ========================
-//
-
 func (or *OrderRepo) GetPayments(ctx context.Context) ([]models.PaymentMethod, error) {
 	rows, err := or.db.Query(ctx, `SELECT id, name FROM payment_methods ORDER BY id`)
 	if err != nil {
@@ -267,12 +254,6 @@ func (or *OrderRepo) GetPayments(ctx context.Context) ([]models.PaymentMethod, e
 	return payments, nil
 }
 
-//
-// ========================
-// Cinemas
-// ========================
-//
-
 func (or *OrderRepo) GetCinemas(ctx context.Context) ([]models.Cinema, error) {
 	rows, err := or.db.Query(ctx, `SELECT id, name FROM cinemas ORDER BY id`)
 	if err != nil {
@@ -290,12 +271,6 @@ func (or *OrderRepo) GetCinemas(ctx context.Context) ([]models.Cinema, error) {
 	}
 	return cinemas, nil
 }
-
-//
-// ========================
-// Locations
-// ========================
-//
 
 func (or *OrderRepo) GetLocations(ctx context.Context) ([]models.Location, error) {
 	rows, err := or.db.Query(ctx, `SELECT id, name FROM locations ORDER BY id`)

@@ -26,9 +26,6 @@ func NewMovieRepository(db *pgxpool.Pool, rdb *redis.Client) *MovieRepository {
 	}
 }
 
-// ======================================================
-// Upcoming Movies (Redis full, per page)
-// ======================================================
 func (mr *MovieRepository) GetUpcomingMovies(c context.Context, page int) ([]models.Movie, int, error) {
 	const pageSize = 12
 	offset := (page - 1) * pageSize
@@ -96,9 +93,6 @@ func (mr *MovieRepository) GetUpcomingMovies(c context.Context, page int) ([]mod
 	return movies, total, nil
 }
 
-// ======================================================
-// Popular Movies (Redis full, per page)
-// ======================================================
 func (mr *MovieRepository) GetPopularMovies(c context.Context, page int) ([]models.Movie, int, error) {
 	const pageSize = 12
 	offset := (page - 1) * pageSize
@@ -166,7 +160,7 @@ func (mr *MovieRepository) GetPopularMovies(c context.Context, page int) ([]mode
 }
 
 func (mr *MovieRepository) GetMovies(ctx context.Context, page int, search string, genreID int) ([]models.Movie, int, error) {
-	const limit = 12 // 🔥 12 movie per halaman
+	const limit = 12
 
 	if page <= 0 {
 		page = 1
@@ -189,7 +183,6 @@ func (mr *MovieRepository) GetMovies(ctx context.Context, page int, search strin
 		where = append(where, fmt.Sprintf("EXISTS (SELECT 1 FROM movies_genres mg2 WHERE mg2.movies_id = m.id AND mg2.genres_id = $%d)", idx))
 	}
 
-	// Count total
 	countQuery := fmt.Sprintf("SELECT COUNT(DISTINCT m.id) FROM movies m WHERE %s", strings.Join(where, " AND "))
 	var total int
 	if err := mr.db.QueryRow(ctx, countQuery, args...).Scan(&total); err != nil {
@@ -243,9 +236,6 @@ func (mr *MovieRepository) GetMovies(ctx context.Context, page int, search strin
 	return movies, total, nil
 }
 
-// ======================================================
-// Movie Detail (tidak pakai Redis)
-// ======================================================
 func (mr *MovieRepository) GetMovieDetails(c context.Context, id int) (*models.Movie, error) {
 	query := `
 		SELECT m.id, m.backdrop_path, m.overview, m.popularity, m.poster_path,
@@ -287,12 +277,10 @@ func (mr *MovieRepository) GetMovieDetails(c context.Context, id int) (*models.M
 	return &m, nil
 }
 
-// GetAllGenres mengambil semua genre yang ada di tabel genres
 func (mr *MovieRepository) GetAllGenres(ctx context.Context) ([]models.Genre, error) {
 	const redisKey = "genres:all"
 	var cached []models.Genre
 
-	// coba ambil dari redis
 	ok, err := utils.GetRedis(ctx, mr.rdb, redisKey, &cached)
 	if err == nil && ok {
 		return cached, nil
@@ -313,7 +301,6 @@ func (mr *MovieRepository) GetAllGenres(ctx context.Context) ([]models.Genre, er
 		genres = append(genres, g)
 	}
 
-	// simpan ke redis 1 jam
 	if err := utils.SetRedis(ctx, mr.rdb, redisKey, genres, time.Hour); err != nil {
 		log.Printf("redis set error: %v\n", err)
 	}
