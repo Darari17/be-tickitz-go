@@ -17,7 +17,7 @@ type CreateMovieRequest struct {
 	Overview    string                `json:"overview" form:"overview" example:"Film tentang pahlawan..."`
 	Director    string                `json:"director_name" form:"director_name" example:"Jon Watts"`
 	Duration    int                   `json:"duration" form:"duration" example:"135"`
-	ReleaseDate time.Time             `json:"release_date" form:"release_date" time_format:"2006-01-02" example:"2025-12-20"`
+	ReleaseDate string                `json:"release_date" form:"release_date" time_format:"2006-01-02" example:"2025-12-20"`
 	Popularity  float64               `json:"popularity" form:"popularity" example:"87.5"`
 	Poster      *multipart.FileHeader `form:"poster"`
 	Backdrop    *multipart.FileHeader `form:"backdrop"`

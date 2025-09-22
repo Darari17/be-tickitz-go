@@ -57,7 +57,6 @@ func (ac *AdminController) CreateMovie(c *gin.Context) {
 		return
 	}
 
-	// --- parse genres ---
 	genresRaw := c.PostFormArray("genres")
 	var genreIDs []int
 	for _, g := range genresRaw {
@@ -79,7 +78,6 @@ func (ac *AdminController) CreateMovie(c *gin.Context) {
 		}
 	}
 
-	// --- parse casts ---
 	castsRaw := c.PostFormArray("casts")
 	var castIDs []int
 	for _, g := range castsRaw {
@@ -101,7 +99,6 @@ func (ac *AdminController) CreateMovie(c *gin.Context) {
 		}
 	}
 
-	// --- parse schedules ---
 	schedulesRaw := c.PostForm("schedules")
 	if schedulesRaw != "" {
 		var scheduleReqs []dtos.ScheduleRequest
@@ -116,7 +113,6 @@ func (ac *AdminController) CreateMovie(c *gin.Context) {
 		body.Schedules = scheduleReqs
 	}
 
-	// validasi field wajib
 	if body.Title == "" {
 		c.JSON(http.StatusBadRequest, dtos.Response{
 			Code:    http.StatusBadRequest,
@@ -126,17 +122,25 @@ func (ac *AdminController) CreateMovie(c *gin.Context) {
 		return
 	}
 
-	// --- build movie model ---
+	date, err := time.Parse("2006-01-02", body.ReleaseDate)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dtos.Response{
+			Code:    http.StatusBadRequest,
+			Success: false,
+			Message: "title is required",
+		})
+		return
+	}
+
 	movie := &models.Movie{
 		Title:       body.Title,
 		Overview:    body.Overview,
 		Director:    body.Director,
 		Duration:    body.Duration,
-		ReleaseDate: body.ReleaseDate,
+		ReleaseDate: date,
 		Popularity:  body.Popularity,
 	}
 
-	// save poster & backdrop
 	if body.Poster != nil {
 		path := utils.SaveImage(c, body.Poster, "poster")
 		if path == "" {
@@ -152,7 +156,6 @@ func (ac *AdminController) CreateMovie(c *gin.Context) {
 		movie.Backdrop = path
 	}
 
-	// convert schedules
 	var schedules []map[string]interface{}
 	for _, s := range body.Schedules {
 		date, _ := time.Parse("2006-01-02", s.Date)
@@ -164,7 +167,6 @@ func (ac *AdminController) CreateMovie(c *gin.Context) {
 		})
 	}
 
-	// --- call repo ---
 	created, err := ac.adminRepository.CreateMovie(c, movie, genreIDs, castIDs, schedules)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.Response{

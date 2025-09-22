@@ -46,6 +46,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Add a new movie with genres, casts, schedules, poster \u0026 backdrop",
                 "consumes": [
                     "multipart/form-data"

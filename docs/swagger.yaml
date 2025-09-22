@@ -186,6 +186,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/dtos.Response'
+      security:
+      - BearerAuth: []
       summary: Create new movie
       tags:
       - Admin - Movies
