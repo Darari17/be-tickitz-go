@@ -42,6 +42,19 @@ definitions:
     - schedule_id
     - seat_codes
     type: object
+  dtos.ErrResponse:
+    properties:
+      code:
+        example: 500
+        type: integer
+      data: {}
+      message:
+        example: internal server error
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
   dtos.ProfileRequest:
     properties:
       firstname:
@@ -97,6 +110,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/dtos.Response'
+      security:
+      - BearerAuth: []
       summary: Get list of movies
       tags:
       - Admin - Movies
@@ -139,14 +154,14 @@ paths:
         name: backdrop
         type: file
       - collectionFormat: csv
-        description: Genre IDs
+        description: 'Genre IDs (contoh: [1,2])'
         in: formData
         items:
           type: integer
         name: genres
         type: array
       - collectionFormat: csv
-        description: Cast IDs
+        description: 'Cast IDs (contoh: [3,5,7])'
         in: formData
         items:
           type: integer
@@ -194,6 +209,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/dtos.Response'
+      security:
+      - BearerAuth: []
       summary: Delete movie
       tags:
       - Admin - Movies
@@ -216,6 +233,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/dtos.Response'
+      security:
+      - BearerAuth: []
       summary: Get movie detail
       tags:
       - Admin - Movies
@@ -262,14 +281,14 @@ paths:
         name: backdrop
         type: file
       - collectionFormat: csv
-        description: Genre IDs
+        description: 'Genre IDs (contoh: [1,2,3])'
         in: formData
         items:
           type: integer
         name: genres
         type: array
       - collectionFormat: csv
-        description: Cast IDs
+        description: 'Cast IDs (contoh: [4,6])'
         in: formData
         items:
           type: integer
@@ -294,9 +313,63 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/dtos.Response'
+      security:
+      - BearerAuth: []
       summary: Update movie
       tags:
       - Admin - Movies
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password
+      parameters:
+      - description: User login credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrResponse'
+      summary: User login
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with email and password
+      parameters:
+      - description: User registration request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dtos.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrResponse'
+      summary: User registration
+      tags:
+      - Auth
   /movies:
     get:
       description: Retrieve a paginated list of movies with optional search and genre
@@ -324,7 +397,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
       summary: Get all movies
       tags:
       - Movies
@@ -344,14 +417,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dtos.Response'
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
       summary: Get movie detail
       tags:
       - Movies
@@ -368,7 +437,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
       summary: Get all genres
       tags:
       - Movies
@@ -390,7 +459,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
       summary: Get popular movies
       tags:
       - Movies
@@ -412,7 +481,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
       summary: Get upcoming movies
       tags:
       - Movies
@@ -435,18 +504,12 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/dtos.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/dtos.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
+      security:
+      - BearerAuth: []
       summary: Create a new order
       tags:
       - Orders
@@ -466,14 +529,12 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dtos.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
+      security:
+      - BearerAuth: []
       summary: Get transaction detail
       tags:
       - Orders
@@ -490,7 +551,9 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
+      security:
+      - BearerAuth: []
       summary: Get all cinemas
       tags:
       - Orders
@@ -504,14 +567,12 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dtos.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/dtos.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
+      security:
+      - BearerAuth: []
       summary: Get order history
       tags:
       - Orders
@@ -528,7 +589,9 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
+      security:
+      - BearerAuth: []
       summary: Get all locations
       tags:
       - Orders
@@ -545,7 +608,9 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
+      security:
+      - BearerAuth: []
       summary: Get all payment methods
       tags:
       - Orders
@@ -565,14 +630,12 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dtos.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
+      security:
+      - BearerAuth: []
       summary: Get schedules by movie ID
       tags:
       - Orders
@@ -592,14 +655,12 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dtos.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
+      security:
+      - BearerAuth: []
       summary: Get available seats
       tags:
       - Orders
@@ -616,45 +677,13 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
+      security:
+      - BearerAuth: []
       summary: Get all times
       tags:
       - Orders
-  /users/login:
-    post:
-      consumes:
-      - application/json
-      description: Authenticate user with email and password
-      parameters:
-      - description: User login credentials
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.UserRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dtos.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/dtos.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.Response'
-      summary: User login
-      tags:
-      - User - Auth
-  /users/profile:
+  /profile:
     get:
       description: Retrieve logged in user profile
       produces:
@@ -664,19 +693,15 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dtos.Response'
-        "401":
-          description: Unauthorized
+        "500":
+          description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
       security:
       - BearerAuth: []
       summary: Get user profile
       tags:
-      - User - Profile
+      - Profile
     patch:
       consumes:
       - application/json
@@ -695,24 +720,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dtos.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/dtos.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
       security:
       - BearerAuth: []
       summary: Update user profile
       tags:
-      - User - Profile
-  /users/profile/avatar:
+      - Profile
+  /profile/change-avatar:
     patch:
       consumes:
       - multipart/form-data
@@ -730,24 +747,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dtos.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/dtos.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
       security:
       - BearerAuth: []
       summary: Change user avatar
       tags:
-      - User - Profile
-  /users/profile/change-password:
+      - Profile
+  /profile/change-password:
     patch:
       consumes:
       - application/json
@@ -766,57 +775,15 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dtos.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/dtos.Response'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Response'
+            $ref: '#/definitions/dtos.ErrResponse'
       security:
       - BearerAuth: []
       summary: Change user password
       tags:
-      - User - Profile
-  /users/register:
-    post:
-      consumes:
-      - application/json
-      description: Register a new user with email and password
-      parameters:
-      - description: User registration request
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.UserRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/dtos.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dtos.Response'
-        "409":
-          description: Conflict
-          schema:
-            $ref: '#/definitions/dtos.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dtos.Response'
-      summary: User registration
-      tags:
-      - User - Auth
+      - Profile
 securityDefinitions:
   BearerAuth:
     description: RESTful API created using gin for BE Tickitz

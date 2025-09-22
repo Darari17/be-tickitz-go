@@ -1,0 +1,14 @@
+name: Building image ba-tickitz-go and pushing to GHCR
+on: [push]
+jobs:
+  Build-And-Publish:
+    runs-on: golang:1.25-alpine
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v5
+
+      - name: Build and publish a Docker image for ${{ github.repository }}
+        uses: macbre/push-to-ghcr@master
+        with:
+          image-name: ${{ github.repository }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}

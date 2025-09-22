@@ -3,8 +3,7 @@ package routers
 import (
 	"net/http"
 
-	"github.com/Darari17/be-tickitz-full/docs"
-	_ "github.com/Darari17/be-tickitz-full/docs"
+	docs "github.com/Darari17/be-tickitz-full/docs"
 	"github.com/Darari17/be-tickitz-full/internal/dtos"
 	"github.com/Darari17/be-tickitz-full/internal/middlewares"
 	"github.com/gin-gonic/gin"
@@ -21,6 +20,7 @@ func InitRouter(db *pgxpool.Pool, rdb *redis.Client) *gin.Engine {
 	initAuthRouter(router, db)
 	initMovieRouter(router, db, rdb)
 	initOrderRouter(router, db)
+	initAdminRoutes(router, db)
 
 	router.Static("/img", "public")
 

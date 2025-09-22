@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Darari17/be-tickitz-full/internal/dtos"
@@ -13,10 +15,10 @@ import (
 )
 
 type AdminController struct {
-	adminRepository *repositories.AdminRepository
+	adminRepository *repositories.AdminRepo
 }
 
-func NewAdminController(ar *repositories.AdminRepository) *AdminController {
+func NewAdminController(ar *repositories.AdminRepo) *AdminController {
 	return &AdminController{
 		adminRepository: ar,
 	}
@@ -36,13 +38,14 @@ func NewAdminController(ar *repositories.AdminRepository) *AdminController {
 // @Param popularity formData number false "Popularity"
 // @Param poster formData file false "Poster image"
 // @Param backdrop formData file false "Backdrop image"
-// @Param genres formData []int false "Genre IDs"
-// @Param casts formData []int false "Cast IDs"
+// @Param genres formData []int false "Genre IDs (contoh: [1,2])"
+// @Param casts formData []int false "Cast IDs (contoh: [3,5,7])"
 // @Param schedules formData string false "Schedules JSON [{cinema_id, location_id, date, time_ids}]"
 // @Success 201 {object} dtos.Response
 // @Failure 400 {object} dtos.Response
 // @Failure 500 {object} dtos.Response
 // @Router /admin/movies [post]
+// @Security BearerAuth
 func (ac *AdminController) CreateMovie(c *gin.Context) {
 	var body dtos.CreateMovieRequest
 	if err := c.ShouldBind(&body); err != nil {
@@ -54,6 +57,76 @@ func (ac *AdminController) CreateMovie(c *gin.Context) {
 		return
 	}
 
+	// --- parse genres ---
+	genresRaw := c.PostFormArray("genres")
+	var genreIDs []int
+	for _, g := range genresRaw {
+		for _, part := range strings.Split(g, ",") {
+			part = strings.TrimSpace(part)
+			if part == "" {
+				continue
+			}
+			id, err := strconv.Atoi(part)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, dtos.Response{
+					Code:    http.StatusBadRequest,
+					Success: false,
+					Message: "Invalid genre ID",
+				})
+				return
+			}
+			genreIDs = append(genreIDs, id)
+		}
+	}
+
+	// --- parse casts ---
+	castsRaw := c.PostFormArray("casts")
+	var castIDs []int
+	for _, g := range castsRaw {
+		for _, part := range strings.Split(g, ",") {
+			part = strings.TrimSpace(part)
+			if part == "" {
+				continue
+			}
+			id, err := strconv.Atoi(part)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, dtos.Response{
+					Code:    http.StatusBadRequest,
+					Success: false,
+					Message: "Invalid cast ID",
+				})
+				return
+			}
+			castIDs = append(castIDs, id)
+		}
+	}
+
+	// --- parse schedules ---
+	schedulesRaw := c.PostForm("schedules")
+	if schedulesRaw != "" {
+		var scheduleReqs []dtos.ScheduleRequest
+		if err := json.Unmarshal([]byte(schedulesRaw), &scheduleReqs); err != nil {
+			c.JSON(http.StatusBadRequest, dtos.Response{
+				Code:    http.StatusBadRequest,
+				Success: false,
+				Message: "Invalid schedules JSON format",
+			})
+			return
+		}
+		body.Schedules = scheduleReqs
+	}
+
+	// validasi field wajib
+	if body.Title == "" {
+		c.JSON(http.StatusBadRequest, dtos.Response{
+			Code:    http.StatusBadRequest,
+			Success: false,
+			Message: "title is required",
+		})
+		return
+	}
+
+	// --- build movie model ---
 	movie := &models.Movie{
 		Title:       body.Title,
 		Overview:    body.Overview,
@@ -63,6 +136,7 @@ func (ac *AdminController) CreateMovie(c *gin.Context) {
 		Popularity:  body.Popularity,
 	}
 
+	// save poster & backdrop
 	if body.Poster != nil {
 		path := utils.SaveImage(c, body.Poster, "poster")
 		if path == "" {
@@ -78,6 +152,7 @@ func (ac *AdminController) CreateMovie(c *gin.Context) {
 		movie.Backdrop = path
 	}
 
+	// convert schedules
 	var schedules []map[string]interface{}
 	for _, s := range body.Schedules {
 		date, _ := time.Parse("2006-01-02", s.Date)
@@ -89,7 +164,8 @@ func (ac *AdminController) CreateMovie(c *gin.Context) {
 		})
 	}
 
-	created, err := ac.adminRepository.CreateMovie(c, movie, body.Genres, body.Casts, schedules)
+	// --- call repo ---
+	created, err := ac.adminRepository.CreateMovie(c, movie, genreIDs, castIDs, schedules)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dtos.Response{
 			Code:    http.StatusInternalServerError,
@@ -115,6 +191,7 @@ func (ac *AdminController) CreateMovie(c *gin.Context) {
 // @Success 200 {object} dtos.Response
 // @Failure 500 {object} dtos.Response
 // @Router /admin/movies [get]
+// @Security BearerAuth
 func (ac *AdminController) GetMovies(c *gin.Context) {
 	movies, err := ac.adminRepository.GetMovies(c)
 	if err != nil {
@@ -142,6 +219,7 @@ func (ac *AdminController) GetMovies(c *gin.Context) {
 // @Success 200 {object} dtos.Response
 // @Failure 404 {object} dtos.Response
 // @Router /admin/movies/{id} [get]
+// @Security BearerAuth
 func (ac *AdminController) GetMovieByID(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	movie, err := ac.adminRepository.GetMovieByID(c, id)
@@ -176,13 +254,14 @@ func (ac *AdminController) GetMovieByID(c *gin.Context) {
 // @Param popularity formData number false "Popularity"
 // @Param poster formData file false "Poster image"
 // @Param backdrop formData file false "Backdrop image"
-// @Param genres formData []int false "Genre IDs"
-// @Param casts formData []int false "Cast IDs"
+// @Param genres formData []int false "Genre IDs (contoh: [1,2,3])"
+// @Param casts formData []int false "Cast IDs (contoh: [4,6])"
 // @Success 200 {object} dtos.Response
 // @Failure 400 {object} dtos.Response
 // @Failure 404 {object} dtos.Response
 // @Failure 500 {object} dtos.Response
 // @Router /admin/movies/{id} [patch]
+// @Security BearerAuth
 func (ac *AdminController) UpdateMovie(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var body dtos.UpdateMovieRequest
@@ -267,6 +346,7 @@ func (ac *AdminController) UpdateMovie(c *gin.Context) {
 // @Success 200 {object} dtos.Response
 // @Failure 500 {object} dtos.Response
 // @Router /admin/movies/{id} [delete]
+// @Security BearerAuth
 func (ac *AdminController) DeleteMovie(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if err := ac.adminRepository.SoftDeleteMovie(c, id); err != nil {

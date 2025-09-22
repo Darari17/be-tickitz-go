@@ -27,7 +27,7 @@ func NewMovieController(mr *repositories.MovieRepository) *MovieController {
 // @Produce json
 // @Param page query int false "Page number"
 // @Success 200 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
+// @Failure 500 {object} dtos.ErrResponse
 // @Router /movies/upcoming [get]
 func (mc *MovieController) GetUpcomingMovies(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
@@ -62,7 +62,7 @@ func (mc *MovieController) GetUpcomingMovies(c *gin.Context) {
 // @Produce json
 // @Param page query int false "Page number"
 // @Success 200 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
+// @Failure 500 {object} dtos.ErrResponse
 // @Router /movies/popular [get]
 func (mc *MovieController) GetPopularMovies(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
@@ -99,7 +99,7 @@ func (mc *MovieController) GetPopularMovies(c *gin.Context) {
 // @Param search query string false "Search by title"
 // @Param genre query int false "Filter by genre ID"
 // @Success 200 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
+// @Failure 500 {object} dtos.ErrResponse
 // @Router /movies [get]
 func (mc *MovieController) GetAllMovies(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
@@ -117,7 +117,6 @@ func (mc *MovieController) GetAllMovies(c *gin.Context) {
 		}
 	}
 
-	// Get movies + total count
 	movies, total, err := mc.movieRepository.GetMovies(c.Request.Context(), page, search, genreID)
 	if err != nil {
 		log.Println(err.Error())
@@ -155,8 +154,7 @@ func (mc *MovieController) GetAllMovies(c *gin.Context) {
 // @Produce json
 // @Param id path int true "Movie ID"
 // @Success 200 {object} dtos.Response
-// @Failure 400 {object} dtos.Response
-// @Failure 404 {object} dtos.Response
+// @Failure 500 {object} dtos.ErrResponse
 // @Router /movies/{id} [get]
 func (mh *MovieController) GetMovieDetail(c *gin.Context) {
 	idStr := c.Param("id")
@@ -195,7 +193,7 @@ func (mh *MovieController) GetMovieDetail(c *gin.Context) {
 // @Tags Movies
 // @Produce json
 // @Success 200 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
+// @Failure 500 {object} dtos.ErrResponse
 // @Router /movies/genres [get]
 func (mc *MovieController) GetGenres(c *gin.Context) {
 	genres, err := mc.movieRepository.GetAllGenres(c.Request.Context())

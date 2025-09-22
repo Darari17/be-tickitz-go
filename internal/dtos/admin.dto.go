@@ -21,8 +21,8 @@ type CreateMovieRequest struct {
 	Popularity  float64               `json:"popularity" form:"popularity" example:"87.5"`
 	Poster      *multipart.FileHeader `form:"poster"`
 	Backdrop    *multipart.FileHeader `form:"backdrop"`
-	Genres      []int                 `json:"genres" form:"genres" example:"Action,Adventure"`
-	Casts       []int                 `json:"casts" form:"casts" example:"Tom Holland,Zendaya"`
+	Genres      []int                 `json:"genres" form:"genres" example:"[1,2]"`
+	Casts       []int                 `json:"casts" form:"casts" example:"[3,5,7]"`
 	Schedules   []ScheduleRequest     `json:"schedules" form:"schedules"`
 }
 
@@ -35,7 +35,7 @@ type UpdateMovieRequest struct {
 	Popularity  *float64              `json:"popularity" form:"popularity" example:"90.2"`
 	Poster      *multipart.FileHeader `form:"poster"`
 	Backdrop    *multipart.FileHeader `form:"backdrop"`
-	Genres      []int                 `json:"genres" form:"genres" example:"Action,Adventure"`
-	Casts       []int                 `json:"casts" form:"casts" example:"Robert Downey Jr,Chris Evans"`
+	Genres      []int                 `json:"genres" form:"genres" example:"[1,2]"`
+	Casts       []int                 `json:"casts" form:"casts" example:"[3,5,7]"`
 	Schedules   []ScheduleRequest     `json:"schedules" form:"schedules"`
 }

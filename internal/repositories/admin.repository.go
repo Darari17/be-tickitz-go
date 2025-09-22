@@ -10,17 +10,88 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type AdminRepository struct {
+type AdminRepo struct {
 	db *pgxpool.Pool
 }
 
-func NewAdminRepository(db *pgxpool.Pool) *AdminRepository {
-	return &AdminRepository{
-		db: db,
+func (r *AdminRepo) CreateMovie(
+	ctx context.Context,
+	movie *models.Movie,
+	genreIDs, castIDs []int,
+	schedules []map[string]interface{},
+) (*models.Movie, error) {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return nil, err
 	}
+	defer tx.Rollback(ctx)
+
+	// insert movie
+	q := `
+		INSERT INTO movies (backdrop_path, overview, popularity, poster_path, release_date, duration, title, director_name, created_at)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW())
+		RETURNING id, created_at
+	`
+	err = tx.QueryRow(ctx, q,
+		movie.Backdrop, movie.Overview, movie.Popularity,
+		movie.Poster, movie.ReleaseDate, movie.Duration,
+		movie.Title, movie.Director,
+	).Scan(&movie.ID, &movie.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	// insert genres (validate ID exists)
+	for _, gid := range genreIDs {
+		var exists bool
+		if err := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM genres WHERE id=$1)`, gid).Scan(&exists); err != nil || !exists {
+			return nil, fmt.Errorf("genre id %d not found", gid)
+		}
+		if _, err := tx.Exec(ctx, `INSERT INTO movies_genres (movies_id, genres_id) VALUES ($1,$2)`, movie.ID, gid); err != nil {
+			return nil, err
+		}
+	}
+
+	// insert casts (validate ID exists)
+	for _, cid := range castIDs {
+		var exists bool
+		if err := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM casts WHERE id=$1)`, cid).Scan(&exists); err != nil || !exists {
+			return nil, fmt.Errorf("cast id %d not found", cid)
+		}
+		if _, err := tx.Exec(ctx, `INSERT INTO movies_casts (movies_id, casts_id) VALUES ($1,$2)`, movie.ID, cid); err != nil {
+			return nil, err
+		}
+	}
+
+	// insert schedules
+	for _, s := range schedules {
+		date := s["date"].(time.Time)
+		cinemaID := s["cinema_id"].(int)
+		locationID := s["location_id"].(int)
+		timeIDs := s["time_ids"].([]int)
+
+		for _, tid := range timeIDs {
+			_, err := tx.Exec(ctx, `
+				INSERT INTO schedules (movies_id, cinemas_id, locations_id, times_id, date)
+				VALUES ($1,$2,$3,$4,$5)
+			`, movie.ID, cinemaID, locationID, tid, date)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, err
+	}
+	return r.GetMovieByID(ctx, movie.ID)
 }
 
-func (r *AdminRepository) GetMovies(ctx context.Context) ([]models.Movie, error) {
+func NewAdminRepo(db *pgxpool.Pool) *AdminRepo {
+	return &AdminRepo{db: db}
+}
+
+func (r *AdminRepo) GetMovies(ctx context.Context) ([]models.Movie, error) {
 	rows, err := r.db.Query(ctx, `
 		SELECT id, backdrop_path, overview, popularity, poster_path,
 		       release_date, duration, title, director_name,
@@ -49,7 +120,7 @@ func (r *AdminRepository) GetMovies(ctx context.Context) ([]models.Movie, error)
 	return movies, nil
 }
 
-func (r *AdminRepository) GetMovieByID(ctx context.Context, id int) (*models.Movie, error) {
+func (r *AdminRepo) GetMovieByID(ctx context.Context, id int) (*models.Movie, error) {
 	var m models.Movie
 	err := r.db.QueryRow(ctx, `
 		SELECT id, backdrop_path, overview, popularity, poster_path,
@@ -94,74 +165,24 @@ func (r *AdminRepository) GetMovieByID(ctx context.Context, id int) (*models.Mov
 	return &m, nil
 }
 
-func (r *AdminRepository) SoftDeleteMovie(ctx context.Context, id int) error {
+func (r *AdminRepo) SoftDeleteMovie(ctx context.Context, id int) error {
 	_, err := r.db.Exec(ctx, `UPDATE movies SET deleted_at=NOW() WHERE id=$1 AND deleted_at IS NULL`, id)
 	return err
 }
 
-func (r *AdminRepository) CreateMovie(ctx context.Context, movie *models.Movie, genreIDs, castIDs []int, schedules []map[string]interface{}) (*models.Movie, error) {
-	tx, err := r.db.Begin(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer tx.Rollback(ctx)
-
-	q := `
-		INSERT INTO movies (backdrop_path, overview, popularity, poster_path, release_date, duration, title, director_name, created_at)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW())
-		RETURNING id, created_at
-	`
-	err = tx.QueryRow(ctx, q,
-		movie.Backdrop, movie.Overview, movie.Popularity,
-		movie.Poster, movie.ReleaseDate, movie.Duration,
-		movie.Title, movie.Director,
-	).Scan(&movie.ID, &movie.CreatedAt)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, gid := range genreIDs {
-		if _, err := tx.Exec(ctx, `INSERT INTO movies_genres (movies_id, genres_id) VALUES ($1,$2)`, movie.ID, gid); err != nil {
-			return nil, err
-		}
-	}
-
-	for _, cid := range castIDs {
-		if _, err := tx.Exec(ctx, `INSERT INTO movies_casts (movies_id, casts_id) VALUES ($1,$2)`, movie.ID, cid); err != nil {
-			return nil, err
-		}
-	}
-
-	for _, s := range schedules {
-		date := s["date"].(time.Time)
-		cinemaID := s["cinema_id"].(int)
-		locationID := s["location_id"].(int)
-		timeIDs := s["time_ids"].([]int)
-
-		for _, tid := range timeIDs {
-			_, err := tx.Exec(ctx, `
-				INSERT INTO schedules (movies_id, cinemas_id, locations_id, times_id, date)
-				VALUES ($1,$2,$3,$4,$5)
-			`, movie.ID, cinemaID, locationID, tid, date)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	if err := tx.Commit(ctx); err != nil {
-		return nil, err
-	}
-	return r.GetMovieByID(ctx, movie.ID)
-}
-
-func (r *AdminRepository) UpdateMovie(ctx context.Context, id int, update map[string]interface{}, genreIDs, castIDs []int) error {
+func (r *AdminRepo) UpdateMovie(
+	ctx context.Context,
+	id int,
+	update map[string]interface{},
+	genreIDs, castIDs []int,
+) error {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
+	// update fields
 	if len(update) > 0 {
 		var setClauses []string
 		args := []interface{}{}
@@ -184,22 +205,32 @@ func (r *AdminRepository) UpdateMovie(ctx context.Context, id int, update map[st
 		}
 	}
 
+	// update genres (replace all if provided)
 	if len(genreIDs) > 0 {
 		if _, err := tx.Exec(ctx, `DELETE FROM movies_genres WHERE movies_id=$1`, id); err != nil {
 			return err
 		}
 		for _, gid := range genreIDs {
+			var exists bool
+			if err := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM genres WHERE id=$1)`, gid).Scan(&exists); err != nil || !exists {
+				return fmt.Errorf("genre id %d not found", gid)
+			}
 			if _, err := tx.Exec(ctx, `INSERT INTO movies_genres (movies_id, genres_id) VALUES ($1,$2)`, id, gid); err != nil {
 				return err
 			}
 		}
 	}
 
+	// update casts (replace all if provided)
 	if len(castIDs) > 0 {
 		if _, err := tx.Exec(ctx, `DELETE FROM movies_casts WHERE movies_id=$1`, id); err != nil {
 			return err
 		}
 		for _, cid := range castIDs {
+			var exists bool
+			if err := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM casts WHERE id=$1)`, cid).Scan(&exists); err != nil || !exists {
+				return fmt.Errorf("cast id %d not found", cid)
+			}
 			if _, err := tx.Exec(ctx, `INSERT INTO movies_casts (movies_id, casts_id) VALUES ($1,$2)`, id, cid); err != nil {
 				return err
 			}

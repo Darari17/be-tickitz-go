@@ -8,16 +8,16 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func AdminRoutes(r *gin.Engine, db *pgxpool.Pool) {
-	adminRepo := repositories.NewAdminRepository(db)
+func initAdminRoutes(r *gin.Engine, db *pgxpool.Pool) {
+	adminRepo := repositories.NewAdminRepo(db)
 	adminCtrl := controllers.NewAdminController(adminRepo)
 
 	admin := r.Group("/admin", middlewares.RequiredToken, middlewares.Access("admin"))
-	{
-		admin.POST("/movies", adminCtrl.CreateMovie)
-		admin.GET("/movies", adminCtrl.GetMovies)
-		admin.GET("/movies/:id", adminCtrl.GetMovieByID)
-		admin.PATCH("/movies/:id", adminCtrl.UpdateMovie)
-		admin.DELETE("/movies/:id", adminCtrl.DeleteMovie)
-	}
+
+	admin.POST("/movies", adminCtrl.CreateMovie)
+	admin.GET("/movies", adminCtrl.GetMovies)
+	admin.GET("/movies/:id", adminCtrl.GetMovieByID)
+	admin.PATCH("/movies/:id", adminCtrl.UpdateMovie)
+	admin.DELETE("/movies/:id", adminCtrl.DeleteMovie)
+
 }

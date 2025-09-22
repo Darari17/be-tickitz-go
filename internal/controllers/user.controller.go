@@ -25,15 +25,13 @@ func NewUserController(ur *repositories.UserRepository) *UserController {
 // Login godoc
 // @Summary User login
 // @Description Authenticate user with email and password
-// @Tags User - Auth
+// @Tags Auth
 // @Accept json
 // @Produce json
 // @Param body body dtos.UserRequest true "User login credentials"
 // @Success 200 {object} dtos.Response
-// @Failure 400 {object} dtos.Response
-// @Failure 401 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
-// @Router /users/login [post]
+// @Failure 500 {object} dtos.ErrResponse
+// @Router /auth/login [post]
 func (uc *UserController) Login(c *gin.Context) {
 	body := dtos.UserRequest{}
 	if err := c.ShouldBind(&body); err != nil {
@@ -111,15 +109,13 @@ func (uc *UserController) Login(c *gin.Context) {
 // Register godoc
 // @Summary User registration
 // @Description Register a new user with email and password
-// @Tags User - Auth
+// @Tags Auth
 // @Accept json
 // @Produce json
 // @Param body body dtos.UserRequest true "User registration request"
 // @Success 201 {object} dtos.Response
-// @Failure 400 {object} dtos.Response
-// @Failure 409 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
-// @Router /users/register [post]
+// @Failure 500 {object} dtos.ErrResponse
+// @Router /auth/register [post]
 func (uc *UserController) Register(c *gin.Context) {
 	body := dtos.UserRequest{}
 	if err := c.ShouldBind(&body); err != nil {
@@ -174,13 +170,12 @@ func (uc *UserController) Register(c *gin.Context) {
 // GetProfile godoc
 // @Summary Get user profile
 // @Description Retrieve logged in user profile
-// @Tags User - Profile
+// @Tags Profile
 // @Produce json
 // @Security BearerAuth
 // @Success 200 {object} dtos.Response
-// @Failure 401 {object} dtos.Response
-// @Failure 404 {object} dtos.Response
-// @Router /users/profile [get]
+// @Failure 500 {object} dtos.ErrResponse
+// @Router /profile [get]
 func (uc *UserController) GetProfile(c *gin.Context) {
 	user, err := utils.GetUser(c)
 	if err != nil {
@@ -226,16 +221,14 @@ func (uc *UserController) GetProfile(c *gin.Context) {
 // UpdateProfile godoc
 // @Summary Update user profile
 // @Description Update first name, last name, and phone number
-// @Tags User - Profile
+// @Tags Profile
 // @Accept json
 // @Produce json
 // @Security BearerAuth
 // @Param body body dtos.ProfileRequest true "Profile update request"
 // @Success 200 {object} dtos.Response
-// @Failure 400 {object} dtos.Response
-// @Failure 401 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
-// @Router /users/profile [patch]
+// @Failure 500 {object} dtos.ErrResponse
+// @Router /profile [patch]
 func (uc *UserController) UpdateProfile(c *gin.Context) {
 	user, err := utils.GetUser(c)
 	if err != nil {
@@ -290,16 +283,14 @@ func (uc *UserController) UpdateProfile(c *gin.Context) {
 // ChangePassword godoc
 // @Summary Change user password
 // @Description Update old password to new password
-// @Tags User - Profile
+// @Tags Profile
 // @Accept json
 // @Produce json
 // @Security BearerAuth
 // @Param body body dtos.ChangePasswordRequest true "Change password request"
 // @Success 200 {object} dtos.Response
-// @Failure 400 {object} dtos.Response
-// @Failure 401 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
-// @Router /users/profile/change-password [patch]
+// @Failure 500 {object} dtos.ErrResponse
+// @Router /profile/change-password [patch]
 func (uc *UserController) ChangePassword(c *gin.Context) {
 	user, err := utils.GetUser(c)
 	if err != nil {
@@ -385,16 +376,14 @@ func (uc *UserController) ChangePassword(c *gin.Context) {
 // ChangeAvatar godoc
 // @Summary Change user avatar
 // @Description Upload a new avatar image for user profile
-// @Tags User - Profile
+// @Tags Profile
 // @Accept multipart/form-data
 // @Produce json
 // @Security BearerAuth
 // @Param avatar formData file true "Avatar image"
 // @Success 200 {object} dtos.Response
-// @Failure 400 {object} dtos.Response
-// @Failure 401 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
-// @Router /users/profile/avatar [patch]
+// @Failure 500 {object} dtos.ErrResponse
+// @Router /profile/change-avatar [patch]
 func (uc *UserController) ChangeAvatar(c *gin.Context) {
 	user, err := utils.GetUser(c)
 	if err != nil {

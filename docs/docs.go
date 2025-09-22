@@ -17,6 +17,11 @@ const docTemplate = `{
     "paths": {
         "/admin/movies": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve all movies",
                 "produces": [
                     "application/json"
@@ -108,7 +113,7 @@ const docTemplate = `{
                             "type": "integer"
                         },
                         "collectionFormat": "csv",
-                        "description": "Genre IDs",
+                        "description": "Genre IDs (contoh: [1,2])",
                         "name": "genres",
                         "in": "formData"
                     },
@@ -118,7 +123,7 @@ const docTemplate = `{
                             "type": "integer"
                         },
                         "collectionFormat": "csv",
-                        "description": "Cast IDs",
+                        "description": "Cast IDs (contoh: [3,5,7])",
                         "name": "casts",
                         "in": "formData"
                     },
@@ -153,6 +158,11 @@ const docTemplate = `{
         },
         "/admin/movies/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a movie by ID",
                 "produces": [
                     "application/json"
@@ -186,6 +196,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Soft delete a movie by ID",
                 "produces": [
                     "application/json"
@@ -219,6 +234,11 @@ const docTemplate = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update movie data including genres, casts, and images",
                 "consumes": [
                     "multipart/form-data"
@@ -292,7 +312,7 @@ const docTemplate = `{
                             "type": "integer"
                         },
                         "collectionFormat": "csv",
-                        "description": "Genre IDs",
+                        "description": "Genre IDs (contoh: [1,2,3])",
                         "name": "genres",
                         "in": "formData"
                     },
@@ -302,7 +322,7 @@ const docTemplate = `{
                             "type": "integer"
                         },
                         "collectionFormat": "csv",
-                        "description": "Cast IDs",
+                        "description": "Cast IDs (contoh: [4,6])",
                         "name": "casts",
                         "in": "formData"
                     }
@@ -330,6 +350,86 @@ const docTemplate = `{
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/dtos.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "description": "Authenticate user with email and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "User login",
+                "parameters": [
+                    {
+                        "description": "User login credentials",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "description": "Register a new user with email and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "User registration",
+                "parameters": [
+                    {
+                        "description": "User registration request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.UserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
@@ -375,7 +475,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
@@ -401,7 +501,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
@@ -435,7 +535,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
@@ -469,7 +569,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
@@ -501,16 +601,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/dtos.Response"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
@@ -518,6 +612,11 @@ const docTemplate = `{
         },
         "/orders": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new order and save to database",
                 "consumes": [
                     "application/json"
@@ -547,22 +646,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/dtos.Response"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
@@ -570,6 +657,11 @@ const docTemplate = `{
         },
         "/orders/cinemas": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve list of available cinemas",
                 "produces": [
                     "application/json"
@@ -588,7 +680,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
@@ -596,6 +688,11 @@ const docTemplate = `{
         },
         "/orders/history": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve order history for current user",
                 "produces": [
                     "application/json"
@@ -611,16 +708,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/dtos.Response"
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
@@ -628,6 +719,11 @@ const docTemplate = `{
         },
         "/orders/locations": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve list of available locations",
                 "produces": [
                     "application/json"
@@ -646,7 +742,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
@@ -654,6 +750,11 @@ const docTemplate = `{
         },
         "/orders/payments": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve list of available payment methods",
                 "produces": [
                     "application/json"
@@ -672,7 +773,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
@@ -680,6 +781,11 @@ const docTemplate = `{
         },
         "/orders/schedules": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve all schedules for a movie",
                 "produces": [
                     "application/json"
@@ -704,16 +810,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/dtos.Response"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
@@ -721,6 +821,11 @@ const docTemplate = `{
         },
         "/orders/seats": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve available seats for a schedule",
                 "produces": [
                     "application/json"
@@ -745,16 +850,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/dtos.Response"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
@@ -762,6 +861,11 @@ const docTemplate = `{
         },
         "/orders/times": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve list of available movie times",
                 "produces": [
                     "application/json"
@@ -780,7 +884,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
@@ -788,6 +892,11 @@ const docTemplate = `{
         },
         "/orders/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve detail of a transaction",
                 "produces": [
                     "application/json"
@@ -812,74 +921,16 @@ const docTemplate = `{
                             "$ref": "#/definitions/dtos.Response"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
             }
         },
-        "/users/login": {
-            "post": {
-                "description": "Authenticate user with email and password",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User - Auth"
-                ],
-                "summary": "User login",
-                "parameters": [
-                    {
-                        "description": "User login credentials",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dtos.UserRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/users/profile": {
+        "/profile": {
             "get": {
                 "security": [
                     {
@@ -891,7 +942,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User - Profile"
+                    "Profile"
                 ],
                 "summary": "Get user profile",
                 "responses": {
@@ -901,16 +952,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/dtos.Response"
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
@@ -929,7 +974,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User - Profile"
+                    "Profile"
                 ],
                 "summary": "Update user profile",
                 "parameters": [
@@ -950,28 +995,16 @@ const docTemplate = `{
                             "$ref": "#/definitions/dtos.Response"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
             }
         },
-        "/users/profile/avatar": {
+        "/profile/change-avatar": {
             "patch": {
                 "security": [
                     {
@@ -986,7 +1019,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User - Profile"
+                    "Profile"
                 ],
                 "summary": "Change user avatar",
                 "parameters": [
@@ -1005,28 +1038,16 @@ const docTemplate = `{
                             "$ref": "#/definitions/dtos.Response"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
             }
         },
-        "/users/profile/change-password": {
+        "/profile/change-password": {
             "patch": {
                 "security": [
                     {
@@ -1041,7 +1062,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User - Profile"
+                    "Profile"
                 ],
                 "summary": "Change user password",
                 "parameters": [
@@ -1062,74 +1083,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/dtos.Response"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/users/register": {
-            "post": {
-                "description": "Register a new user with email and password",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User - Auth"
-                ],
-                "summary": "User registration",
-                "parameters": [
-                    {
-                        "description": "User registration request",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dtos.UserRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.Response"
+                            "$ref": "#/definitions/dtos.ErrResponse"
                         }
                     }
                 }
@@ -1193,6 +1150,24 @@ const docTemplate = `{
                         "[\"A1\"",
                         "\"A2\"]"
                     ]
+                }
+            }
+        },
+        "dtos.ErrResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 500
+                },
+                "data": {},
+                "message": {
+                    "type": "string",
+                    "example": "internal server error"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
                 }
             }
         },

@@ -20,23 +20,16 @@ func NewOrderController(or *repositories.OrderRepo) *OrderController {
 	return &OrderController{orderRepo: or}
 }
 
-//
-// ========================
-// Orders
-// ========================
-//
-
 // CreateOrder godoc
 // @Summary Create a new order
 // @Description Create a new order and save to database
 // @Tags Orders
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param order body dtos.CreateOrderRequest true "Order Data"
 // @Success 201 {object} dtos.Response
-// @Failure 400 {object} dtos.Response
-// @Failure 401 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
+// @Failure 500 {object} dtos.ErrResponse
 // @Router /orders [post]
 // CreateOrder godoc
 func (oc *OrderController) CreateOrder(ctx *gin.Context) {
@@ -60,7 +53,6 @@ func (oc *OrderController) CreateOrder(ctx *gin.Context) {
 		return
 	}
 
-	// 🔑 Konversi seat codes -> seat IDs
 	seatIDs, err := oc.orderRepo.GetSeatIDsByCodes(ctx.Request.Context(), req.SeatCodes)
 	if err != nil {
 		log.Println("GetSeatIDsByCodes error:", err)
@@ -108,10 +100,10 @@ func (oc *OrderController) CreateOrder(ctx *gin.Context) {
 // @Description Retrieve all schedules for a movie
 // @Tags Orders
 // @Produce json
+// @Security BearerAuth
 // @Param movie_id query int true "Movie ID"
 // @Success 200 {object} dtos.Response
-// @Failure 400 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
+// @Failure 500 {object} dtos.ErrResponse
 // @Router /orders/schedules [get]
 func (oc *OrderController) GetSchedules(ctx *gin.Context) {
 	movieIDStr := ctx.Query("movie_id")
@@ -161,10 +153,10 @@ func (oc *OrderController) GetSchedules(ctx *gin.Context) {
 // @Description Retrieve available seats for a schedule
 // @Tags Orders
 // @Produce json
+// @Security BearerAuth
 // @Param schedule_id query int true "Schedule ID"
 // @Success 200 {object} dtos.Response
-// @Failure 400 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
+// @Failure 500 {object} dtos.ErrResponse
 // @Router /orders/seats [get]
 func (oc *OrderController) GetAvailableSeats(ctx *gin.Context) {
 	scheduleIDStr := ctx.Query("schedule_id")
@@ -210,10 +202,10 @@ func (oc *OrderController) GetAvailableSeats(ctx *gin.Context) {
 // @Description Retrieve detail of a transaction
 // @Tags Orders
 // @Produce json
+// @Security BearerAuth
 // @Param id path int true "Order ID"
 // @Success 200 {object} dtos.Response
-// @Failure 400 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
+// @Failure 500 {object} dtos.ErrResponse
 // @Router /orders/{id} [get]
 func (oc *OrderController) GetTransactionDetail(ctx *gin.Context) {
 	idStr := ctx.Param("id")
@@ -250,9 +242,9 @@ func (oc *OrderController) GetTransactionDetail(ctx *gin.Context) {
 // @Description Retrieve order history for current user
 // @Tags Orders
 // @Produce json
+// @Security BearerAuth
 // @Success 200 {object} dtos.Response
-// @Failure 401 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
+// @Failure 500 {object} dtos.ErrResponse
 // @Router /orders/history [get]
 func (oc *OrderController) GetOrderHistory(ctx *gin.Context) {
 	user, err := utils.GetUser(ctx)
@@ -288,8 +280,9 @@ func (oc *OrderController) GetOrderHistory(ctx *gin.Context) {
 // @Description Retrieve list of available payment methods
 // @Tags Orders
 // @Produce json
+// @Security BearerAuth
 // @Success 200 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
+// @Failure 500 {object} dtos.ErrResponse
 // @Router /orders/payments [get]
 func (oc *OrderController) GetPayments(ctx *gin.Context) {
 	payments, err := oc.orderRepo.GetPayments(ctx.Request.Context())
@@ -315,8 +308,9 @@ func (oc *OrderController) GetPayments(ctx *gin.Context) {
 // @Description Retrieve list of available cinemas
 // @Tags Orders
 // @Produce json
+// @Security BearerAuth
 // @Success 200 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
+// @Failure 500 {object} dtos.ErrResponse
 // @Router /orders/cinemas [get]
 func (oc *OrderController) GetCinemas(ctx *gin.Context) {
 	cinemas, err := oc.orderRepo.GetCinemas(ctx.Request.Context())
@@ -342,8 +336,9 @@ func (oc *OrderController) GetCinemas(ctx *gin.Context) {
 // @Description Retrieve list of available locations
 // @Tags Orders
 // @Produce json
+// @Security BearerAuth
 // @Success 200 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
+// @Failure 500 {object} dtos.ErrResponse
 // @Router /orders/locations [get]
 func (oc *OrderController) GetLocations(ctx *gin.Context) {
 	locations, err := oc.orderRepo.GetLocations(ctx.Request.Context())
@@ -369,8 +364,9 @@ func (oc *OrderController) GetLocations(ctx *gin.Context) {
 // @Description Retrieve list of available movie times
 // @Tags Orders
 // @Produce json
+// @Security BearerAuth
 // @Success 200 {object} dtos.Response
-// @Failure 500 {object} dtos.Response
+// @Failure 500 {object} dtos.ErrResponse
 // @Router /orders/times [get]
 func (oc *OrderController) GetTimes(ctx *gin.Context) {
 	times, err := oc.orderRepo.GetTimes(ctx.Request.Context())
