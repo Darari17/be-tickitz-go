@@ -14,7 +14,7 @@ jobs:
         run: docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Docker image (backend)
-        run: docker build -t ghcr.io/darari17/backend:latest ./be-tickitz-app
+        run: docker build -t ghcr.io/darari17/backend:latest .
 
       - name: Push Docker image (backend)
         run: docker push ghcr.io/darari17/backend:latest
