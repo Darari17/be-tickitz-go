@@ -1,14 +1,20 @@
 name: Building image backend-tickitz-go and pushing to GHCR
+
 on: [push]
+
 jobs:
   Build-And-Publish:
-    runs-on: golang:1.25-alpine
+    runs-on: ubuntu-latest
+
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
-      - name: Build and publish a Docker image for ${{ github.repository }}
-        uses: macbre/push-to-ghcr@master
-        with:
-          image-name: ${{ github.repository }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        run: docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image (backend)
+        run: docker build -t ghcr.io/darari17/backend:latest .
+
+      - name: Push Docker image (backend)
+        run: docker push ghcr.io/darari17/backend:latest
