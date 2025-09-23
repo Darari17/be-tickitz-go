@@ -10,11 +10,11 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      - name: Login to GitHub Container Registry
-        run: docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+      # - name: Login to GitHub Container Registry
+      #   run: docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Docker image (backend)
-        run: docker build -t ghcr.io/darari17/backend:latest .
+      # - name: Build Docker image (backend)
+      #   run: docker build -t ghcr.io/darari17/backend:latest .
 
-      - name: Push Docker image (backend)
-        run: docker push ghcr.io/darari17/backend:latest
+      # - name: Push Docker image (backend)
+      #   run: docker push ghcr.io/darari17/backend:latest
