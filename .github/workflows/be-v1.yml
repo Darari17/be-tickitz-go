@@ -34,5 +34,5 @@ jobs:
           file: dockerfile.be-tickitz
           push: true
           tags: |
-            ghcr.io/darari17/be-tickitz:1.0.1
+            ghcr.io/darari17/be-tickitz:1.0
             ghcr.io/darari17/be-tickitz:${{ github.sha }}
