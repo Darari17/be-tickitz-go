@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -35,11 +36,11 @@ func NewAdminController(ar *repositories.AdminRepo) *AdminController {
 // @Param director_name formData string false "Director Name"
 // @Param duration formData int false "Duration in minutes"
 // @Param release_date formData string false "Release date in format YYYY-MM-DD"
-// @Param popularity formData number false "Popularity"
+// @Param popularity formData int false "Popularity"
 // @Param poster formData file false "Poster image"
 // @Param backdrop formData file false "Backdrop image"
-// @Param genres formData []int false "Genre IDs (contoh: [1,2])"
-// @Param casts formData []int false "Cast IDs (contoh: [3,5,7])"
+// @Param genres formData []int false "Genre IDs (contoh: [1,2])" collectionFormat(multi)
+// @Param casts formData []int false "Cast IDs (contoh: [3,5,7])" collectionFormat(multi)
 // @Param schedules formData string false "Schedules JSON [{cinema_id, location_id, date, time_ids}]"
 // @Success 201 {object} dtos.Response
 // @Failure 400 {object} dtos.Response
@@ -49,6 +50,7 @@ func NewAdminController(ar *repositories.AdminRepo) *AdminController {
 func (ac *AdminController) CreateMovie(c *gin.Context) {
 	var body dtos.CreateMovieRequest
 	if err := c.ShouldBind(&body); err != nil {
+		log.Println(err.Error())
 		c.JSON(http.StatusBadRequest, dtos.Response{
 			Code:    http.StatusBadRequest,
 			Success: false,

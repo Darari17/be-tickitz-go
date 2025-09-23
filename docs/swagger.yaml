@@ -144,7 +144,7 @@ paths:
       - description: Popularity
         in: formData
         name: popularity
-        type: number
+        type: integer
       - description: Poster image
         in: formData
         name: poster
@@ -153,14 +153,14 @@ paths:
         in: formData
         name: backdrop
         type: file
-      - collectionFormat: csv
+      - collectionFormat: multi
         description: 'Genre IDs (contoh: [1,2])'
         in: formData
         items:
           type: integer
         name: genres
         type: array
-      - collectionFormat: csv
+      - collectionFormat: multi
         description: 'Cast IDs (contoh: [3,5,7])'
         in: formData
         items:

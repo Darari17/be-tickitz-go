@@ -95,7 +95,7 @@ const docTemplate = `{
                         "in": "formData"
                     },
                     {
-                        "type": "number",
+                        "type": "integer",
                         "description": "Popularity",
                         "name": "popularity",
                         "in": "formData"
@@ -117,7 +117,7 @@ const docTemplate = `{
                         "items": {
                             "type": "integer"
                         },
-                        "collectionFormat": "csv",
+                        "collectionFormat": "multi",
                         "description": "Genre IDs (contoh: [1,2])",
                         "name": "genres",
                         "in": "formData"
@@ -127,7 +127,7 @@ const docTemplate = `{
                         "items": {
                             "type": "integer"
                         },
-                        "collectionFormat": "csv",
+                        "collectionFormat": "multi",
                         "description": "Cast IDs (contoh: [3,5,7])",
                         "name": "casts",
                         "in": "formData"
@@ -1248,8 +1248,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	// LeftDelim:        "{{",
-	// RightDelim:       "}}",
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {

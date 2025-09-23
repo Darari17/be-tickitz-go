@@ -86,7 +86,7 @@
                         "in": "formData"
                     },
                     {
-                        "type": "number",
+                        "type": "integer",
                         "description": "Popularity",
                         "name": "popularity",
                         "in": "formData"
@@ -108,7 +108,7 @@
                         "items": {
                             "type": "integer"
                         },
-                        "collectionFormat": "csv",
+                        "collectionFormat": "multi",
                         "description": "Genre IDs (contoh: [1,2])",
                         "name": "genres",
                         "in": "formData"
@@ -118,7 +118,7 @@
                         "items": {
                             "type": "integer"
                         },
-                        "collectionFormat": "csv",
+                        "collectionFormat": "multi",
                         "description": "Cast IDs (contoh: [3,5,7])",
                         "name": "casts",
                         "in": "formData"

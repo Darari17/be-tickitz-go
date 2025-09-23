@@ -23,7 +23,7 @@ type CreateMovieRequest struct {
 	Backdrop    *multipart.FileHeader `form:"backdrop"`
 	Genres      []int                 `json:"genres" form:"genres" example:"[1,2]"`
 	Casts       []int                 `json:"casts" form:"casts" example:"[3,5,7]"`
-	Schedules   []ScheduleRequest     `json:"schedules" form:"schedules"`
+	Schedules   []ScheduleRequest     `json:"schedules" form:"-"`
 }
 
 type UpdateMovieRequest struct {
@@ -37,5 +37,5 @@ type UpdateMovieRequest struct {
 	Backdrop    *multipart.FileHeader `form:"backdrop"`
 	Genres      []int                 `json:"genres" form:"genres" example:"[1,2]"`
 	Casts       []int                 `json:"casts" form:"casts" example:"[3,5,7]"`
-	Schedules   []ScheduleRequest     `json:"schedules" form:"schedules"`
+	Schedules   []ScheduleRequest     `json:"schedules" form:"-"`
 }
