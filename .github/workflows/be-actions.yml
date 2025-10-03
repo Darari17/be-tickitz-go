@@ -27,7 +27,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: Dockerfile.backend
+          file: Dockerfile.new
           push: true
-          tags: ghcr.io/febryanhernanda/belalai-e-wallet-backend:latest
+          tags: ghcr.io/darari17/new-be-tickitz:latest
           platforms: linux/amd64,linux/arm64
