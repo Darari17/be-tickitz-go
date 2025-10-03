@@ -33,5 +33,5 @@ jobs:
           context: .
           file: ./Dockerfile.new
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/be-tickitz-go:latest
+          tags: ghcr.io/darari17/be-tickitz-go:latest
           platforms: linux/amd64,linux/arm64
