@@ -1,4 +1,4 @@
-# Belalai E-Wallet Backend
+# be-tickitz-full
 
 ![badge golang](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)
 ![badge postgresql](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
@@ -125,7 +125,7 @@ $ go run ./cmd/main.go
 
 MIT License
 
-Copyright (c) 2025 Belalai team
+Copyright (c) 2025 Farid Rhamadhan Darari
 
 ## 📧 Contact Info & Contributor
 
