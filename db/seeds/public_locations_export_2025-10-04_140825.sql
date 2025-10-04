@@ -1,0 +1,10 @@
+insert into "locations" ("id", "name") values (1, 'Purwokerto');
+insert into "locations" ("id", "name") values (2, 'Jakarta');
+insert into "locations" ("id", "name") values (3, 'Bandung');
+insert into "locations" ("id", "name") values (4, 'Surabaya');
+insert into "locations" ("id", "name") values (5, 'Yogyakarta');
+insert into "locations" ("id", "name") values (6, 'Semarang');
+insert into "locations" ("id", "name") values (7, 'Medan');
+insert into "locations" ("id", "name") values (8, 'Bali');
+insert into "locations" ("id", "name") values (9, 'Malang');
+insert into "locations" ("id", "name") values (10, 'Makassar');
