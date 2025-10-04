@@ -49,5 +49,5 @@ func main() {
 
 	// router
 	router := routers.InitRouter(db, rdb)
-	router.Run("localhost:8080")
+	router.Run(":8080")
 }
